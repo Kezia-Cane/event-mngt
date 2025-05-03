@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import User from "../models/User";
 
@@ -71,19 +71,16 @@ export const login = async (req: Request, res: Response) => {
 };
 
 // Get current user profile
-export const getProfile = async (req: Request, res: Response) => {
-  try {
-    if (!req.user) {
-      return res.status(401).json({ message: "Not authorized" });
-    }
-
-    res.json({
-      _id: req.user._id,
-      name: req.user.name,
-      email: req.user.email,
-      role: req.user.role,
-    });
-  } catch (error: any) {
-    res.status(500).json({ message: error.message });
+export const getProfile = (req: Request, res: Response): void => {
+  if (!req.user) {
+    res.status(401).json({ message: "Not authorized" });
+    return;
   }
+
+  res.json({
+    _id: req.user._id,
+    name: req.user.name,
+    email: req.user.email,
+    role: req.user.role,
+  });
 };
