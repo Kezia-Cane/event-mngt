@@ -1,16 +1,6 @@
 import { Request, Response } from "express";
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 import Event from "../models/Event";
-import { IUser } from "../models/User";
-
-// Update Express Request interface
-declare global {
-  namespace Express {
-    interface Request {
-      user?: IUser;
-    }
-  }
-}
 
 // Get all events
 export const getAllEvents = async (req: Request, res: Response) => {
@@ -47,6 +37,7 @@ export const createEvent = async (req: Request, res: Response) => {
     }
 
     const { title, description, date, location, capacity, category } = req.body;
+    const userId = req.user._id as unknown as mongoose.Schema.Types.ObjectId;
 
     const event = await Event.create({
       title,
@@ -55,7 +46,7 @@ export const createEvent = async (req: Request, res: Response) => {
       location,
       capacity,
       category,
-      organizer: req.user._id,
+      organizer: userId,
       attendees: [],
     });
 
@@ -78,9 +69,11 @@ export const updateEvent = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Event not found" });
     }
 
+    const userId = req.user._id as unknown as mongoose.Schema.Types.ObjectId;
+
     // Check if user is the organizer or an admin
     if (
-      event.organizer.toString() !== req.user._id.toString() &&
+      event.organizer.toString() !== userId.toString() &&
       req.user.role !== "admin"
     ) {
       return res
@@ -113,9 +106,11 @@ export const deleteEvent = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Event not found" });
     }
 
+    const userId = req.user._id as unknown as mongoose.Schema.Types.ObjectId;
+
     // Check if user is the organizer or an admin
     if (
-      event.organizer.toString() !== req.user._id.toString() &&
+      event.organizer.toString() !== userId.toString() &&
       req.user.role !== "admin"
     ) {
       return res
@@ -144,20 +139,22 @@ export const registerForEvent = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Event not found" });
     }
 
+    const userId = req.user._id as unknown as mongoose.Schema.Types.ObjectId;
+
     // Check if event is at capacity
     if (event.attendees.length >= event.capacity) {
       return res.status(400).json({ message: "Event is at full capacity" });
     }
 
     // Check if user is already registered
-    if (event.attendees.includes(req.user._id)) {
+    if (event.attendees.some((id) => id.toString() === userId.toString())) {
       return res
         .status(400)
         .json({ message: "Already registered for this event" });
     }
 
     // Add user to attendees
-    event.attendees.push(req.user._id);
+    event.attendees.push(userId);
     await event.save();
 
     res.json(event);
@@ -179,14 +176,16 @@ export const unregisterFromEvent = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "Event not found" });
     }
 
+    const userId = req.user._id as unknown as mongoose.Schema.Types.ObjectId;
+
     // Check if user is registered
-    if (!event.attendees.includes(req.user._id)) {
+    if (!event.attendees.some((id) => id.toString() === userId.toString())) {
       return res.status(400).json({ message: "Not registered for this event" });
     }
 
     // Remove user from attendees
     event.attendees = event.attendees.filter(
-      (attendee) => attendee.toString() !== req.user?._id?.toString()
+      (attendee) => attendee.toString() !== userId.toString()
     );
 
     await event.save();
