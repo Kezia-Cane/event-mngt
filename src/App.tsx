@@ -1,44 +1,46 @@
-import { useState } from 'react';
-import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
-import './App.css';
-import LoginForm from './components/auth/LoginForm';
-import ProtectedRoute from './components/auth/ProtectedRoute';
-import RegisterForm from './components/auth/RegisterForm';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { EventProvider } from './context/EventContext';
 import { AuthProvider } from './context/AuthContext';
-
-// Placeholder components (to be implemented later)
-const Home = () => <div>Home Page</div>;
-const Dashboard = () => <div>User Dashboard</div>;
-const AdminDashboard = () => <div>Admin Dashboard</div>;
+import Header from './components/layout/Header';
+import Footer from './components/layout/Footer';
+import Home from './components/Home';
+import EventList from './components/events/EventList';
+import EventDetail from './components/events/EventDetail';
+import CreateEvent from './components/events/CreateEvent';
+import EditEvent from './components/events/EditEvent';
+import Login from './components/auth/Login';
+import Register from './components/auth/Register';
+import Profile from './components/user/Profile';
 
 function App() {
-  const [count, setCount] = useState(0)
+  // Remove unused state
+  // const [count, setCount] = useState(0);
 
   return (
-    <AuthProvider>
-      <Router>
-        <Routes>
-          {/* Public routes */}
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<LoginForm />} />
-          <Route path="/register" element={<RegisterForm />} />
-
-          {/* Protected routes for all authenticated users */}
-          <Route element={<ProtectedRoute />}>
-            <Route path="/dashboard" element={<Dashboard />} />
-          </Route>
-
-          {/* Protected routes for admin users */}
-          <Route element={<ProtectedRoute requireAdmin={true} />}>
-            <Route path="/admin" element={<AdminDashboard />} />
-          </Route>
-
-          {/* Fallback route */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Router>
-    </AuthProvider>
+    <Router>
+      <AuthProvider>
+        <EventProvider>
+          <div className="flex flex-col min-h-screen">
+            <Header />
+            <main className="flex-grow">
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/events" element={<EventList />} />
+                <Route path="/events/:id" element={<EventDetail />} />
+                <Route path="/events/create" element={<CreateEvent />} />
+                <Route path="/events/edit/:id" element={<EditEvent />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="*" element={<Navigate to="/" />} />
+              </Routes>
+            </main>
+            <Footer />
+          </div>
+        </EventProvider>
+      </AuthProvider>
+    </Router>
   );
 }
 
-export default App
+export default App;
