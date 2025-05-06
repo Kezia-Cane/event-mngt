@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useEvents } from '../../context/EventContext';
 import { useAuth } from '../../context/AuthContext';
+import { useEvents } from '../../context/EventContext';
 
 // Define the Event interface if not already imported
 interface Event {

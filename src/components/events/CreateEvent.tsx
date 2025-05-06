@@ -28,15 +28,15 @@ const CreateEvent = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    
+
     // Combine date and time
     const dateTime = new Date(`${formData.date}T${formData.time}`);
-    
+
     if (isNaN(dateTime.getTime())) {
       setError('Please enter a valid date and time');
       return;
     }
-    
+
     try {
       setLoading(true);
       await createEvent({
@@ -56,13 +56,13 @@ const CreateEvent = () => {
       <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
         <div className="p-6">
           <h1 className="text-2xl font-bold mb-6">Create New Event</h1>
-          
+
           {error && (
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
               {error}
             </div>
           )}
-          
+
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
               <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="title">
@@ -78,7 +78,7 @@ const CreateEvent = () => {
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               />
             </div>
-            
+
             <div className="mb-4">
               <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="description">
                 Description
@@ -93,7 +93,7 @@ const CreateEvent = () => {
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               />
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
                 <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="date">
@@ -109,7 +109,7 @@ const CreateEvent = () => {
                   className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="time">
                   Time
@@ -125,7 +125,7 @@ const CreateEvent = () => {
                 />
               </div>
             </div>
-            
+
             <div className="mb-4">
               <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="location">
                 Location
@@ -140,7 +140,7 @@ const CreateEvent = () => {
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               />
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
                 <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="capacity">
@@ -157,7 +157,7 @@ const CreateEvent = () => {
                   className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="category">
                   Category
@@ -180,7 +180,7 @@ const CreateEvent = () => {
                 </select>
               </div>
             </div>
-            
+
             <div className="flex items-center justify-between mt-6">
               <button
                 type="button"
