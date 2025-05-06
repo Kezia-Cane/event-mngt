@@ -1,8 +1,8 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
 import axios from 'axios';
+import React, { createContext, ReactNode, useContext, useState } from 'react';
 
 // Define types for our events
-interface Event {
+export interface Event {
   _id: string;
   title: string;
   description: string;
@@ -23,8 +23,8 @@ interface EventContextType {
   createEvent: (eventData: Omit<Event, '_id' | 'organizer' | 'attendees'>) => Promise<Event>;
   updateEvent: (id: string, eventData: Partial<Event>) => Promise<Event>;
   deleteEvent: (id: string) => Promise<void>;
-  registerForEvent: (id: string) => Promise<void>;
-  unregisterFromEvent: (id: string) => Promise<void>;
+  registerForEvent: (id: string) => Promise<Event>;
+  unregisterFromEvent: (id: string) => Promise<Event>;
 }
 
 const EventContext = createContext<EventContextType | undefined>(undefined);
@@ -105,13 +105,14 @@ export const EventProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     }
   };
 
-  const registerForEvent = async (id: string): Promise<void> => {
+  const registerForEvent = async (id: string): Promise<Event> => {
     setLoading(true);
     setError(null);
     try {
-      await axios.post(`/api/events/${id}/register`);
+      const response = await axios.post(`/api/events/${id}/register`);
       // Update the local events state
       await fetchEvents();
+      return response.data;
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to register for event');
       throw err;
@@ -120,13 +121,14 @@ export const EventProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     }
   };
 
-  const unregisterFromEvent = async (id: string): Promise<void> => {
+  const unregisterFromEvent = async (id: string): Promise<Event> => {
     setLoading(true);
     setError(null);
     try {
-      await axios.post(`/api/events/${id}/unregister`);
+      const response = await axios.post(`/api/events/${id}/unregister`);
       // Update the local events state
       await fetchEvents();
+      return response.data;
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to unregister from event');
       throw err;

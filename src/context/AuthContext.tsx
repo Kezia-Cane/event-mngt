@@ -1,15 +1,17 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import axios from 'axios';
+import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 
 interface User {
   _id: string;
   name: string;
   email: string;
+  role?: string;
 }
 
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
+  isAdmin: boolean;
   loading: boolean;
   error: string | null;
   login: (email: string, password: string) => Promise<void>;
@@ -89,10 +91,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setIsAuthenticated(false);
   };
 
+  // Check if user is admin
+  const isAdmin = user?.role === 'admin';
+
   return (
     <AuthContext.Provider value={{
       user,
       isAuthenticated,
+      isAdmin,
       loading,
       error,
       login,

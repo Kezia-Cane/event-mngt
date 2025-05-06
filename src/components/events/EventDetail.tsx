@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { useEvents } from '../../context/EventContext';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { Event, useEvents } from '../../context/EventContext';
 
 const EventDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { getEvent, registerForEvent, unregisterFromEvent, deleteEvent } = useEvents();
   const { user, isAuthenticated, isAdmin } = useAuth();
-  const [event, setEvent] = useState<any>(null);
+  const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [registering, setRegistering] = useState(false);
@@ -16,7 +16,7 @@ const EventDetail = () => {
   useEffect(() => {
     const fetchEvent = async () => {
       if (!id) return;
-      
+
       try {
         const eventData = await getEvent(id);
         setEvent(eventData);
@@ -28,11 +28,11 @@ const EventDetail = () => {
     };
 
     fetchEvent();
-  }, [id]);
+  }, [id, getEvent]);
 
   const handleRegister = async () => {
     if (!id || !isAuthenticated) return;
-    
+
     try {
       setRegistering(true);
       const updatedEvent = await registerForEvent(id);
@@ -46,7 +46,7 @@ const EventDetail = () => {
 
   const handleUnregister = async () => {
     if (!id || !isAuthenticated) return;
-    
+
     try {
       setRegistering(true);
       const updatedEvent = await unregisterFromEvent(id);
@@ -60,7 +60,7 @@ const EventDetail = () => {
 
   const handleDelete = async () => {
     if (!id || !isAuthenticated) return;
-    
+
     if (window.confirm('Are you sure you want to delete this event?')) {
       try {
         await deleteEvent(id);
@@ -83,8 +83,8 @@ const EventDetail = () => {
     return <div className="text-center">Event not found</div>;
   }
 
-  const isOrganizer = user && event.organizer && user._id === event.organizer._id;
-  const isAttending = user && event.attendees && event.attendees.some((a: any) => a._id === user._id);
+  const isOrganizer = user && event.organizer && user._id === event.organizer;
+  const isAttending = user && event.attendees && event.attendees.some((a: any) => a === user._id);
   const isFull = event.attendees.length >= event.capacity;
 
   return (
@@ -97,41 +97,40 @@ const EventDetail = () => {
               {event.category}
             </span>
           </div>
-          
+
           <div className="mb-6">
             <p className="text-gray-700 mb-4">{event.description}</p>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <h3 className="text-sm font-medium text-gray-500">Date & Time</h3>
-                <p>{new Date(event.date).toLocaleString()}</p>
+                <p className="text-gray-600">
+                  <strong>Date:</strong> {new Date(event.date).toLocaleDateString()}
+                </p>
+                <p className="text-gray-600">
+                  <strong>Time:</strong> {new Date(event.date).toLocaleTimeString()}
+                </p>
               </div>
               <div>
-                <h3 className="text-sm font-medium text-gray-500">Location</h3>
-                <p>{event.location}</p>
-              </div>
-              <div>
-                <h3 className="text-sm font-medium text-gray-500">Organizer</h3>
-                <p>{event.organizer?.name || 'Unknown'}</p>
-              </div>
-              <div>
-                <h3 className="text-sm font-medium text-gray-500">Capacity</h3>
-                <p>{event.attendees.length} / {event.capacity}</p>
+                <p className="text-gray-600">
+                  <strong>Location:</strong> {event.location}
+                </p>
+                <p className="text-gray-600">
+                  <strong>Capacity:</strong> {event.attendees.length} / {event.capacity}
+                </p>
               </div>
             </div>
           </div>
-          
+
           {isAuthenticated && (
             <div className="flex flex-wrap gap-2 mb-6">
               {isOrganizer || isAdmin ? (
                 <>
-                  <Link 
-                    to={`/events/${event._id}/edit`}
+                  <Link
+                    to={`/events/edit/${event._id}`}
                     className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
                   >
                     Edit Event
                   </Link>
-                  <button 
+                  <button
                     onClick={handleDelete}
                     className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
                   >
@@ -141,7 +140,7 @@ const EventDetail = () => {
               ) : (
                 <>
                   {isAttending ? (
-                    <button 
+                    <button
                       onClick={handleUnregister}
                       disabled={registering}
                       className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded disabled:opacity-50"
@@ -149,7 +148,7 @@ const EventDetail = () => {
                       {registering ? 'Processing...' : 'Cancel Registration'}
                     </button>
                   ) : (
-                    <button 
+                    <button
                       onClick={handleRegister}
                       disabled={registering || isFull}
                       className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded disabled:opacity-50"
@@ -159,7 +158,7 @@ const EventDetail = () => {
                   )}
                 </>
               )}
-              <Link 
+              <Link
                 to="/events"
                 className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded"
               >
@@ -167,16 +166,16 @@ const EventDetail = () => {
               </Link>
             </div>
           )}
-          
+
           <div>
             <h3 className="text-xl font-semibold mb-2">Attendees ({event.attendees.length})</h3>
             {event.attendees.length === 0 ? (
               <p className="text-gray-500">No attendees yet</p>
             ) : (
               <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                {event.attendees.map((attendee: any) => (
-                  <li key={attendee._id} className="text-gray-700">
-                    {attendee.name}
+                {event.attendees.map((attendee: string) => (
+                  <li key={attendee} className="text-gray-700">
+                    {attendee}
                   </li>
                 ))}
               </ul>

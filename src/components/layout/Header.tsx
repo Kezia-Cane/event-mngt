@@ -2,14 +2,14 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
 const Header = () => {
-  const { isAuthenticated, user, logout } = useAuth();
+  const { isAuthenticated, logout } = useAuth();
 
   return (
     <header className="bg-blue-600 text-white shadow-md">
       <div className="container mx-auto px-4 py-4">
         <div className="flex justify-between items-center">
           <Link to="/" className="text-2xl font-bold">EventMgt</Link>
-          
+
           <nav>
             <ul className="flex space-x-6">
               <li>
@@ -18,14 +18,14 @@ const Header = () => {
               <li>
                 <Link to="/events" className="hover:text-blue-200">Events</Link>
               </li>
-              
+
               {isAuthenticated ? (
                 <>
                   <li>
                     <Link to="/profile" className="hover:text-blue-200">Profile</Link>
                   </li>
                   <li>
-                    <button 
+                    <button
                       onClick={() => logout()}
                       className="hover:text-blue-200"
                     >
