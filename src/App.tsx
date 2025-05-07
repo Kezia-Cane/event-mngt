@@ -1,16 +1,15 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { EventProvider } from './context/EventContext';
-import { AuthProvider } from './context/AuthContext';
-import Header from './components/layout/Header';
-import Footer from './components/layout/Footer';
+import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import Home from './components/Home';
-import EventList from './components/events/EventList';
-import EventDetail from './components/events/EventDetail';
+import Login from './components/auth/LoginForm';
+import Register from './components/auth/RegisterForm';
 import CreateEvent from './components/events/CreateEvent';
 import EditEvent from './components/events/EditEvent';
-import Login from './components/auth/Login';
-import Register from './components/auth/Register';
-import Profile from './components/user/Profile';
+import EventDetail from './components/events/EventDetail';
+import EventList from './components/events/EventList';
+import Footer from './components/layout/Footer';
+import Header from './components/layout/Header';
+import { AuthProvider } from './context/AuthContext';
+import { EventProvider } from './context/EventContext';
 
 function App() {
   // Remove unused state
@@ -31,7 +30,6 @@ function App() {
                 <Route path="/events/edit/:id" element={<EditEvent />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
-                <Route path="/profile" element={<Profile />} />
                 <Route path="*" element={<Navigate to="/" />} />
               </Routes>
             </main>
