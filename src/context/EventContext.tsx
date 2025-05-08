@@ -12,8 +12,30 @@ export interface Event {
   category: string;
   organizer: string;
   attendees: string[];
-  banner?: string; // Add the banner property as optional
+  banner?: string; // Keep as string for received events
 }
+
+// Define a separate type for event creation that includes File
+export type EventFormData = {
+  title: string;
+  description: string;
+  date: Date;
+  location: string;
+  capacity: number;
+  category: string;
+  banner?: File | null;
+};
+
+// Define a type for event updates
+export type EventUpdateData = {
+  title?: string;
+  description?: string;
+  date?: Date;
+  location?: string;
+  capacity?: number;
+  category?: string;
+  banner?: File | null;
+};
 
 interface EventContextType {
   events: Event[];
@@ -21,8 +43,8 @@ interface EventContextType {
   error: string | null;
   fetchEvents: () => Promise<void>;
   getEvent: (id: string) => Promise<Event>;
-  createEvent: (eventData: Omit<Event, '_id' | 'organizer' | 'attendees'>) => Promise<Event>;
-  updateEvent: (id: string, eventData: Partial<Event>) => Promise<Event>;
+  createEvent: (eventData: EventFormData) => Promise<Event>;
+  updateEvent: (id: string, eventData: EventUpdateData) => Promise<Event>;
   deleteEvent: (id: string) => Promise<void>;
   registerForEvent: (id: string) => Promise<Event>;
   unregisterFromEvent: (id: string) => Promise<Event>;
@@ -62,13 +84,37 @@ export const EventProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     }
   };
 
-  const createEvent = async (eventData: Omit<Event, '_id' | 'organizer' | 'attendees'>): Promise<Event> => {
+  const createEvent = async (eventData: EventFormData): Promise<Event> => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.post('/api/events', eventData);
-      setEvents([...events, response.data]);
-      return response.data;
+      // Create FormData if there's a banner file
+      const bannerFile = eventData.banner;
+      if (bannerFile && bannerFile instanceof File) {
+        const formData = new FormData();
+        // Add all event data to FormData
+        Object.entries(eventData).forEach(([key, value]) => {
+          if (key === 'banner' && value instanceof File) {
+            formData.append('banner', value);
+          } else if (key === 'date' && value instanceof Date) {
+            formData.append(key, value.toISOString());
+          } else if (value !== undefined && value !== null) {
+            formData.append(key, String(value));
+          }
+        });
+
+        const response = await axios.post('/api/events', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        setEvents([...events, response.data]);
+        return response.data;
+      } else {
+        // Regular JSON request if no file
+        const { banner, ...restData } = eventData;
+        const response = await axios.post('/api/events', restData);
+        setEvents([...events, response.data]);
+        return response.data;
+      }
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to create event');
       throw err;
@@ -77,13 +123,37 @@ export const EventProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     }
   };
 
-  const updateEvent = async (id: string, eventData: Partial<Event>): Promise<Event> => {
+  const updateEvent = async (id: string, eventData: EventUpdateData): Promise<Event> => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.put(`/api/events/${id}`, eventData);
-      setEvents(events.map(event => event._id === id ? response.data : event));
-      return response.data;
+      // Create FormData if there's a banner file
+      const bannerFile = eventData.banner;
+      if (bannerFile && bannerFile instanceof File) {
+        const formData = new FormData();
+        // Add all event data to FormData
+        Object.entries(eventData).forEach(([key, value]) => {
+          if (key === 'banner' && value instanceof File) {
+            formData.append('banner', value);
+          } else if (key === 'date' && value instanceof Date) {
+            formData.append(key, value.toISOString());
+          } else if (value !== undefined && value !== null) {
+            formData.append(key, String(value));
+          }
+        });
+
+        const response = await axios.put(`/api/events/${id}`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        setEvents(events.map(event => event._id === id ? response.data : event));
+        return response.data;
+      } else {
+        // Regular JSON request if no file
+        const { banner, ...restData } = eventData;
+        const response = await axios.put(`/api/events/${id}`, restData);
+        setEvents(events.map(event => event._id === id ? response.data : event));
+        return response.data;
+      }
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to update event');
       throw err;
