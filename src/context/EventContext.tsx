@@ -10,8 +10,14 @@ export interface Event {
   location: string;
   capacity: number;
   category: string;
-  organizer: string;
-  attendees: string[];
+  organizer: {
+    _id: string;
+    name: string;
+  } | string;
+  attendees: Array<{
+    _id: string;
+    name: string;
+  } | string>;
   banner?: string; // Keep as string for received events
 }
 

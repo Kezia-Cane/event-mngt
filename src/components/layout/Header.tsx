@@ -3,31 +3,33 @@ import { useAuth } from '../../context/AuthContext';
 
 const Header = () => {
   const { isAuthenticated, logout } = useAuth();
+  // Removed 'user' since it's not being used
 
   return (
-    <header className="bg-blue-600 text-white shadow-md">
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex justify-between items-center">
-          <Link to="/" className="text-2xl font-bold">EventMgt</Link>
-
+    <header className="bg-white shadow-md">
+      <div className="max-w-6xl mx-auto px-4">
+        <div className="flex justify-between items-center h-16">
+          <div className="flex items-center">
+            <Link to="/" className="text-xl font-bold text-blue-600">EventMgt</Link>
+          </div>
           <nav>
             <ul className="flex space-x-6">
               <li>
-                <Link to="/" className="hover:text-blue-200">Home</Link>
+                <Link to="/" className="hover:text-blue-600">Home</Link>
               </li>
               <li>
-                <Link to="/events" className="hover:text-blue-200">Events</Link>
+                <Link to="/events" className="hover:text-blue-600">Events</Link>
               </li>
 
               {isAuthenticated ? (
                 <>
                   <li>
-                    <Link to="/profile" className="hover:text-blue-200">Profile</Link>
+                    <Link to="/profile" className="hover:text-blue-600">Profile</Link>
                   </li>
                   <li>
                     <button
                       onClick={() => logout()}
-                      className="hover:text-blue-200"
+                      className="hover:text-blue-600"
                     >
                       Logout
                     </button>
@@ -36,10 +38,10 @@ const Header = () => {
               ) : (
                 <>
                   <li>
-                    <Link to="/login" className="hover:text-blue-200">Login</Link>
+                    <Link to="/login" className="hover:text-blue-600">Login</Link>
                   </li>
                   <li>
-                    <Link to="/register" className="hover:text-blue-200">Register</Link>
+                    <Link to="/register" className="hover:text-blue-600">Register</Link>
                   </li>
                 </>
               )}

@@ -1,79 +1,138 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useEvents } from '../../context/EventContext';
 
-// Define the Event interface if not already imported
-interface Event {
-  _id: string;
-  title: string;
-  description: string;
-  date: Date;
-  location: string;
-  capacity: number;
-  category: string;
-  organizer: string;
-  attendees: string[];
-  banner?: string; // Add the banner property as optional
-}
-
 const EventList = () => {
   const { events, loading, error, fetchEvents } = useEvents();
   const { isAuthenticated } = useAuth();
+  const [filter, setFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     fetchEvents();
   }, [fetchEvents]);
 
-  if (loading) {
-    return <div className="flex justify-center items-center h-screen">Loading events...</div>;
-  }
+  // Filter events based on category and search term
+  const filteredEvents = events.filter(event => {
+    const matchesCategory = filter === 'all' || event.category === filter;
+    const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          event.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          event.location.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
 
-  if (error) {
-    return <div className="text-red-500 text-center">{error}</div>;
+  // Get unique categories for filter
+  const categories = ['all', ...new Set(events.map(event => event.category))];
+
+  if (loading) {
+    return <div className="flex justify-center items-center h-64">Loading events...</div>;
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Events</h1>
+    <div className="max-w-6xl mx-auto p-4">
+      <div className="flex flex-col md:flex-row justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold mb-4 md:mb-0">Upcoming Events</h1>
+
         {isAuthenticated && (
           <Link
             to="/events/create"
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
           >
             Create Event
           </Link>
         )}
       </div>
 
-      {events.length === 0 ? (
-        <p className="text-center text-gray-500">No events found</p>
+      {error && <div className="bg-red-100 text-red-700 p-3 rounded mb-4">{error}</div>}
+
+      <div className="mb-6 flex flex-col md:flex-row gap-4">
+        <div className="w-full md:w-2/3">
+          <input
+            type="text"
+            placeholder="Search events..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full p-2 border rounded"
+          />
+        </div>
+
+        <div className="w-full md:w-1/3">
+          <select
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            className="w-full p-2 border rounded"
+          >
+            {categories.map(category => (
+              <option key={category} value={category}>
+                {category === 'all' ? 'All Categories' : category}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {filteredEvents.length === 0 ? (
+        <div className="text-center py-8">
+          <p className="text-gray-500">No events found. Try adjusting your filters or create a new event.</p>
+        </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {events.map((event: Event) => (
-            <div key={event._id} className="border rounded-lg overflow-hidden shadow-md">
-              <div className="p-4">
-                <h2 className="text-xl font-semibold mb-2">{event.title}</h2>
-                <p className="text-gray-600 mb-2">
-                  {new Date(event.date).toLocaleDateString()}
-                </p>
-                <p className="text-gray-600 mb-2">{event.location}</p>
-                <p className="text-gray-700 mb-4 line-clamp-3">{event.description}</p>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-500">
-                    {event.attendees.length} / {event.capacity} attendees
-                  </span>
-                  <Link
-                    to={`/events/${event._id}`}
-                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded text-sm"
-                  >
-                    View Details
-                  </Link>
+          {filteredEvents.map(event => {
+            const eventDate = new Date(event.date);
+            return (
+              <Link
+                key={event._id}
+                to={`/events/${event._id}`}
+                className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+              >
+                <div className="h-48 bg-gray-200 relative">
+                  {event.banner ? (
+                    <img
+                      src={`http://localhost:5000${event.banner}`}
+                      alt={event.title}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                      <span className="text-gray-400">No image</span>
+                    </div>
+                  )}
+                  <div className="absolute top-2 right-2 bg-blue-600 text-white text-xs px-2 py-1 rounded">
+                    {event.category}
+                  </div>
                 </div>
-              </div>
-            </div>
-          ))}
+
+                <div className="p-4">
+                  <h2 className="text-xl font-semibold mb-2 truncate">{event.title}</h2>
+
+                  <div className="flex items-center text-gray-600 text-sm mb-2">
+                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    <span>
+                      {eventDate.toLocaleDateString()} at {eventDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center text-gray-600 text-sm mb-3">
+                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    <span className="truncate">{event.location}</span>
+                  </div>
+
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-500">
+                      {event.attendees.length} / {event.capacity} attendees
+                    </span>
+                    <span className="text-blue-600 text-sm font-medium">View details →</span>
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       )}
     </div>

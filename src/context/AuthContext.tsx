@@ -5,7 +5,10 @@ interface User {
   _id: string;
   name: string;
   email: string;
-  role?: string;
+  role: string;
+  createdAt: string;
+  isAdmin?: boolean;
+  // Add other properties as needed
 }
 
 interface AuthContextType {

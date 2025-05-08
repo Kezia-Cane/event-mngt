@@ -25,3 +25,12 @@ dist-ssr
 
 # Project specific files
 README_EventManagementSystem.md
+
+# Environment variables
+.env
+.env.local
+.env.development
+.env.production
+
+# Uploaded files
+server/uploads/
