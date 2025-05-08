@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Event, useEvents } from '../../context/EventContext';
+import { useEvents } from '../../context/EventContext';
 
 const EventDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { getEvent, registerForEvent, unregisterFromEvent, deleteEvent } = useEvents();
   const { user, isAuthenticated, isAdmin } = useAuth();
-  const [event, setEvent] = useState<Event | null>(null);
+  const [event, setEvent] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [registering, setRegistering] = useState(false);
@@ -72,24 +72,36 @@ const EventDetail = () => {
   };
 
   if (loading) {
-    return <div className="flex justify-center items-center h-screen">Loading event...</div>;
+    return <div className="flex justify-center items-center h-64">Loading event...</div>;
   }
 
   if (error) {
-    return <div className="text-red-500 text-center">{error}</div>;
+    return <div className="text-red-500 text-center p-4">{error}</div>;
   }
 
   if (!event) {
-    return <div className="text-center">Event not found</div>;
+    return <div className="text-center p-4">Event not found</div>;
   }
 
-  const isOrganizer = user && event.organizer && user._id === event.organizer;
-  const isAttending = user && event.attendees && event.attendees.some((a: any) => a === user._id);
+  const isOrganizer = user && event.organizer && user._id === event.organizer._id;
+  const isAttending = user && event.attendees && event.attendees.some((a: any) => a._id === user._id);
   const isFull = event.attendees.length >= event.capacity;
+  const eventDate = new Date(event.date);
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
+    <div className="max-w-4xl mx-auto p-4">
+      <div className="bg-white rounded-lg shadow-md overflow-hidden">
+        {/* Banner Image */}
+        {event.banner && (
+          <div className="w-full h-64 bg-gray-200 relative">
+            <img
+              src={`http://localhost:5000${event.banner}`}
+              alt={event.title}
+              className="w-full h-full object-cover"
+            />
+          </div>
+        )}
+
         <div className="p-6">
           <div className="flex justify-between items-start mb-4">
             <h1 className="text-3xl font-bold">{event.title}</h1>
@@ -103,10 +115,10 @@ const EventDetail = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <p className="text-gray-600">
-                  <strong>Date:</strong> {new Date(event.date).toLocaleDateString()}
+                  <strong>Date:</strong> {eventDate.toLocaleDateString()}
                 </p>
                 <p className="text-gray-600">
-                  <strong>Time:</strong> {new Date(event.date).toLocaleTimeString()}
+                  <strong>Time:</strong> {eventDate.toLocaleTimeString()}
                 </p>
               </div>
               <div>
