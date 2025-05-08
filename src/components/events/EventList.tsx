@@ -14,6 +14,7 @@ interface Event {
   category: string;
   organizer: string;
   attendees: string[];
+  banner?: string; // Add the banner property as optional
 }
 
 const EventList = () => {
