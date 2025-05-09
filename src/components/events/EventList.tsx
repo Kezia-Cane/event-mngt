@@ -10,6 +10,7 @@ const EventList = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
+    // Make sure events are fetched when component mounts
     fetchEvents();
   }, [fetchEvents]);
 
@@ -37,7 +38,7 @@ const EventList = () => {
         {isAuthenticated && (
           <Link
             to="/events/create"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+            className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded"
           >
             Create Event
           </Link>
@@ -98,7 +99,7 @@ const EventList = () => {
                       <span className="text-gray-400">No image</span>
                     </div>
                   )}
-                  <div className="absolute top-2 right-2 bg-blue-600 text-white text-xs px-2 py-1 rounded">
+                  <div className="absolute top-2 right-2 bg-primary-600 text-white text-xs px-2 py-1 rounded">
                     {event.category}
                   </div>
                 </div>
@@ -115,19 +116,11 @@ const EventList = () => {
                     </span>
                   </div>
 
-                  <div className="flex items-center text-gray-600 text-sm mb-3">
-                    <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                    </svg>
-                    <span className="truncate">{event.location}</span>
-                  </div>
-
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-500">
                       {event.attendees.length} / {event.capacity} attendees
                     </span>
-                    <span className="text-blue-600 text-sm font-medium">View details →</span>
+                    <span className="text-primary-600 text-sm font-medium">View details →</span>
                   </div>
                 </div>
               </Link>
