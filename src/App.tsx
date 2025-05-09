@@ -1,7 +1,7 @@
 import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import Home from './components/Home';
 import Login from './components/auth/LoginForm';
-import PrivateRoute from './components/auth/ProtectedRoute';
+import PrivateRoute from './components/auth/PrivateRoute';
 import Register from './components/auth/RegisterForm';
 import CreateEvent from './components/events/CreateEvent';
 import EditEvent from './components/events/EditEvent';
@@ -24,7 +24,6 @@ function App() {
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/events" element={<EventList />} />
-                <Route path="/events/:id" element={<EventDetail />} />
                 <Route path="/events/create" element={
                   <PrivateRoute>
                     <CreateEvent />
@@ -35,6 +34,7 @@ function App() {
                     <EditEvent />
                   </PrivateRoute>
                 } />
+                <Route path="/events/:id" element={<EventDetail />} />
                 <Route path="/profile" element={
                   <PrivateRoute>
                     <Profile />
