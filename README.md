@@ -2,8 +2,6 @@
 
 A full-stack web application for creating, managing, and attending events. Built with React, TypeScript, Node.js, Express, and MongoDB.
 
-![Event Management System](https://via.placeholder.com/800x400?text=Event+Management+System)
-
 ## Features
 
 - **User Authentication**: Secure registration and login system with JWT authentication
